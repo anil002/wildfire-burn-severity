@@ -414,6 +414,9 @@ def main():
         with c1:
             col1, col2 = st.columns(2)
             
+            # Set current date explicitly
+            current_date = datetime(2025, 5, 28)
+            
             with col1:
                 st.markdown(
                     '<div class="date-picker-container pre-fire-date">',
@@ -422,10 +425,10 @@ def main():
                 st.warning("Pre-Fire NBR Date Range 📅", icon="📅")
                 pre_fire_dates = st.date_input(
                     "Select pre-fire date range",
-                    value=(datetime(2023, 7, 5), datetime(2023, 7, 12)),
-                    min_value=datetime(2015, 6, 23),  # Sentinel-2 start
-                    max_value=datetime.now(),
-                    help="Choose a date range before the wildfire to capture baseline imagery. A 7-day range is recommended.",
+                    value=(current_date - timedelta(days=30), current_date - timedelta(days=23)),
+                    min_value=datetime(2019, 6, 23),  # Sentinel-2 start
+                    max_value=current_date,
+                    help="Choose a date range before the wildfire (e.g., 30 to 23 days before today) to capture baseline imagery. A 7-day range is recommended for better data availability.",
                     key="pre_fire_range"
                 )
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -442,10 +445,10 @@ def main():
                 st.success("Post-Fire NBR Date Range 📅", icon="📅")
                 post_fire_dates = st.date_input(
                     "Select post-fire date range",
-                    value=(datetime(2023, 7, 20), datetime(2023, 7, 27)),
-                    min_value=datetime(2015, 6, 23),
-                    max_value=datetime.now(),
-                    help="Choose a date range after the wildfire to assess burn severity. A 7-day range is recommended.",
+                    value=(current_date - timedelta(days=7), current_date),
+                    min_value=datetime(2019, 6, 23),
+                    max_value=current_date,
+                    help="Choose a date range after the wildfire (e.g., 7 days before today to today) to assess burn severity. A 7-day range is recommended.",
                     key="post_fire_range"
                 )
                 st.markdown('</div>', unsafe_allow_html=True)
