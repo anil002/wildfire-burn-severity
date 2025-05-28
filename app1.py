@@ -305,8 +305,8 @@ def calculate_class_area(_classified_image, _geometry_aoi, class_value):
         class_area = class_pixel_area.reduceRegion(
             reducer=ee.Reducer.sum(),
             geometry=_geometry_aoi,
-            scale=10,
-            maxPixels=1e10
+            scale=30,
+            maxPixels=1e13
         )
         area_value = class_area.getInfo()
         return area_value.get(list(area_value.keys())[0], 0)
@@ -558,7 +558,7 @@ def main():
             waterMask = binaryMask.selfMask()
             masked_dNBR_classified = dNBR_classified.updateMask(waterMask)
 
-            dNBR_classified_burn = dNBR_classified.gte(4)
+            dNBR_classified_burn = dNBR_classified.gte(6)
             dNBR_classified_burn = dNBR_classified_burn.updateMask(dNBR_classified_burn.neq(0))
 
             vectors = dNBR_classified_burn.addBands(dNBR_classified_burn).reduceToVectors(
@@ -771,18 +771,20 @@ def main():
                 return pd.DataFrame({"Date": [], "Precipitation": []})
 
             daily_precipitation = raincol.map(
-                lambda img: ee.Feature(
-                    _aoi,
-                    {
-                        "date": img.date().format("YYYY-MM-dd"),
-                        "precipitation": img.reduceRegion(
-                            reducer=ee.Reducer.mean(),
-                            geometry=_aoi,
-                            scale=30
-                        ).get("precipitation"),
-                    }
-                )
-            )
+    lambda img: ee.Feature(
+        _aoi,
+        {
+            "date": img.date().format("YYYY-MM-dd"),
+            "precipitation": img.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=_aoi,
+                scale=30,
+                maxPixels=1e13,
+                bestEffort=True
+            ).get("precipitation"),
+        }
+    )
+)
             daily_list = daily_precipitation.getInfo()["features"]
             dates = [entry["properties"]["date"] for entry in daily_list]
             values = [entry["properties"]["precipitation"] for entry in daily_list]
